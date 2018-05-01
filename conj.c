@@ -30,6 +30,25 @@ void print_vector(double * x, long N )
 	}
 }
 
+void save_vector(double * x, long N )
+{
+	FILE * fp = fopen("out.txt", "w");
+	long n = sqrt(N);
+	long idx = 0;
+	for( long i = 0; i < n; i++ )
+	{
+		for( long j = 0; j < n; j++ )
+		{
+			fprintf(fp, "%.9le", x[idx]);
+			idx++;
+			if( j != n-1 )
+				fprintf(fp, " ");
+		}
+		if( i != n - 1 )
+			fprintf(fp, "\n");
+	}
+}
+
 /* Allocates 2-D Contiguous Matrix */
 double ** matrix( long N )
 {
@@ -278,7 +297,7 @@ int main(int argc, const char** argv){
 	FILE *outfile;
 		
 	// n x n square grid
-	int n = 4;
+	int n = 100;
 
 	// Dimension of operator matrix and vectors is n^2
 	int N = n*n;
@@ -294,6 +313,7 @@ int main(int argc, const char** argv){
 	// Compute elements of boundary condition vector 'b'
 	fill_b(b, N);
 
+	/*
 	printf("A matrix:\n");
 	print_matrix(A, N);
 
@@ -301,18 +321,12 @@ int main(int argc, const char** argv){
 	print_vector(b, N);
 	
 	printf("Running CG...\n");
+	*/
 	conjgrad(A, x, b, N);
 
-	printf("Solution matrix:\n");
-	print_vector(x, N);
+	//printf("Solution matrix:\n");
+	//print_vector(x, N);
 
+	save_vector(x,N);
 	
-	/*
-	// print
-	char buf[128];
-	sprintf(buf, "A.dat", s);
-	outfile = fopen(buf, "wb");
-	fwrite(&b[0],sizeof(double),n*n,outfile);
-	fclose(outfile);
-	*/
 }
