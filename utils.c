@@ -27,9 +27,9 @@ void print_vector(double * x, long N )
 	}
 }
 
-void save_vector(double * x, long N )
+void save_vector(double * x, long N, char * fname )
 {
-	FILE * fp = fopen("out.txt", "w");
+	FILE * fp = fopen(fname, "w");
 	long n = sqrt(N);
 	long idx = 0;
 	for( long i = 0; i < n; i++ )
@@ -63,4 +63,20 @@ void matrix_free( double ** M)
 {
 	free(M[0]);
 	free(M);
+}
+
+double get_time(void)
+{
+    #ifdef MPI
+    return MPI_Wtime();
+    #endif
+
+    #ifdef OPENMP
+    return omp_get_wtime();
+    #endif
+
+    time_t time;
+    time = clock();
+
+    return (double) time / (double) CLOCKS_PER_SEC;
 }

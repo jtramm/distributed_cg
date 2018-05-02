@@ -3,8 +3,7 @@
 #===============================================================================
 
 COMPILER    = gnu
-OPENMP      = yes
-MPI         = yes
+MPI         = no
 OPTIMIZE    = yes
 PROFILE     = no
 
@@ -16,8 +15,7 @@ program = cg
 
 source = \
 main.c \
-cg_dense.c \
-cg_sparse.c \
+serial.c \
 utils.c
 
 obj = $(source:.c=.o)
@@ -67,7 +65,7 @@ endif
 
 # OpenMP
 ifeq ($(OPENMP),yes)
-  CFLAGS += -fopenmp
+  CFLAGS += -fopenmp -DOPENMP
 endif
 
 #===============================================================================
