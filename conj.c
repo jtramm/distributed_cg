@@ -1,174 +1,100 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
+#include "conj_header.h"
 
-void print_matrix(double ** A, long N )
+// General Matrix Vector Product for v = M * w
+// v, w = 1D vectors
+// M = 2D matrix
+// N = dimension
+void matvec( double * v, double ** M, double * w, long N )
 {
-	for( long i = 0; i < N; i++ )
-	{
-		for( long j = 0; j < N; j++ )
-		{
-			printf("%4.1lf ", A[i][j]);
-		}
-		printf("\n");
-	}
-}
-
-void print_vector(double * x, long N )
-{
-	long n = sqrt(N);
-	long idx = 0;
-	for( long i = 0; i < n; i++ )
-	{
-		for( long j = 0; j < n; j++ )
-		{
-			printf("%4.1lf ", x[idx]);
-			idx++;
-		}
-		printf("\n");
-	}
-}
-
-void save_vector(double * x, long N )
-{
-	FILE * fp = fopen("out.txt", "w");
-	long n = sqrt(N);
-	long idx = 0;
-	for( long i = 0; i < n; i++ )
-	{
-		for( long j = 0; j < n; j++ )
-		{
-			fprintf(fp, "%.9le", x[idx]);
-			idx++;
-			if( j != n-1 )
-				fprintf(fp, " ");
-		}
-		if( i != n - 1 )
-			fprintf(fp, "\n");
-	}
-}
-
-/* Allocates 2-D Contiguous Matrix */
-double ** matrix( long N )
-{
-	double *data = (double *) calloc( N*N, sizeof(double) );
-	double **M  = (double **) malloc( N  * sizeof(double*));
-
-	for( int i = 0; i < N; i++ )
-		M[i] = &data[i*N];
-
-	return M;
-}
-
-/* Free's 2-D Contiguous Matrix */
-void matrix_free( double ** M)
-{
-	free(M[0]);
-	free(M);
-}
-
-// Matrix Vector Product for b = A * x
-void matvec( double * b, double ** A, double * x, long n )
-{
-	// Wipe solution vector clean
-	memset( b, 0, n*sizeof(double));
+	// Set solution vector to 0
+	memset( v, 0, N*sizeof(double));
 	
-	for (long i = 0; i < n; i++)
-		for (long j = 0; j < n; j++)
-			b[i] += (A[i][j] * x[j]);
+	for (long i = 0; i < N; i++)
+		for (long j = 0; j < N; j++)
+			v[i] += (M[i][j] * w[j]);
 }
 
-// "On the fly" Matrix Vector Product for b = A * x
-// where 'A' is the known poisson operator matrix
+// Specific "On the fly" Matrix Vector Product for v = A * w
+// where 'A' is the 2D Poisson operator matrix
 // that is applied without explicit storage
-void matvec_OTF( double * b, double * x, long N )
+// v, w = 1D vectors
+// N = dimension
+void matvec_OTF( double * v, double * w, long N )
 {
+	// Determine physical dimension
 	long n = sqrt(N);
 
-	// Wipe solution vector clean
-	memset( b, 0, N*sizeof(double));
+	// Set solution vector to 0
+	memset( v, 0, N*sizeof(double));
 	
 	for( long i = 0; i < N; i++ )
 	{
+		// Physical 2D x-coordinate
 		long x_i = i%n;
 
 		// Far left diagonal
 		double far_left_diag = 0.0;
 		if( i >= n )
-			far_left_diag = -1.0 * x[i-n];
+			far_left_diag = -1.0 * w[i-n];
 
 		// left diagonal
 		double left_diag = 0.0;
 		if( x_i != 0 )
-			left_diag = -1.0 * x[i-1];
+			left_diag = -1.0 * w[i-1];
 
 		// Main diagonal
-		double main_diag = 4.0 * x[i];
+		double main_diag = 4.0 * w[i];
 
 		// Right diagonal
 		double right_diag = 0.0;
 		if( x_i != n-1 )
-			right_diag = -1.0 * x[i+1];
+			right_diag = -1.0 * w[i+1];
 
 		// Far right diagonal
 		double far_right_diag = 0.0;
 		if( i < N - n )
-			far_right_diag = -1.0 * x[i+n];
+			far_right_diag = -1.0 * w[i+n];
 
-		b[i] = far_left_diag + left_diag + main_diag + right_diag + far_right_diag;
+		v[i] = far_left_diag + left_diag + main_diag + right_diag + far_right_diag;
 	}
 }
 
-
-// dot product of c = a * b
-double dotp( double * a, double * b, long n)
+// Dot product of c = a * b
+// c = result scalar that's returned
+// a, b = 1D Vectors
+// N = dimension
+double dotp( double * a, double * b, long N)
 {
 	double c = 0.0;
-	for( long i = 0; i < n; i++ )
+	for( long i = 0; i < N; i++ )
 		c += a[i]*b[i];
 
 	return c;
 }
 
-/* MATLAB Function
-function [x] = conjgrad(A, b, x)
-    r = b - A * x;
-    p = r;
-    rsold = r' * r;
-
-    for i = 1:length(b)
-        Ap = A * p;
-        alpha = rsold / (p' * Ap);
-        x = x + alpha * p;
-        r = r - alpha * Ap;
-        rsnew = r' * r;
-        if sqrt(rsnew) < 1e-10
-              break;
-        end
-        p = r + (rsnew / rsold) * p;
-        rsold = rsnew;
-    end
-end
-*/
-
-// solves x = alpha * x + beta * v (overwrites what's in x)
+// Scale and add of two vectors (axpy)
+// Solves w = alpha * w + beta * v (overwrites what's in w)
 // alpha, beta = scalars
-// x, v = 1D vectors
-void axpy( double alpha, double * x, double beta, double * v, long n)
+// w, v = 1D vectors
+// N = dimension
+void axpy( double alpha, double * w, double beta, double * v, long N)
 {
-	for( long i = 0; i < n; i++ )
-		x[i] = alpha * x[i] + beta * v[i];
+	for( long i = 0; i < N; i++ )
+		w[i] = alpha * w[i] + beta * v[i];
 }
 
+// Serial Conjugate Gradient Solver Function for Ax = b
+// A must be symmetric and positive definite
+// A = 2D operator matrix
+// x = 1D solution vector
+// b = 1D vector
+// N = dimension
 void conjgrad(double ** A, double * x, double * b, long N)
 {
 	// r = -A*x + b
 	double * r = (double *) malloc( N*sizeof(double));
 	matvec_OTF(r, x, N);
 	axpy(-1.0, r, 1.0, b, N);
-	//printf("r = p at beginning:\n");
-	//print_vector(r, N);
 
     //p = r;
 	double * p = (double *) malloc( N*sizeof(double));
@@ -185,21 +111,15 @@ void conjgrad(double ** A, double * x, double * b, long N)
 	{
         //Ap = A * p;
 		matvec_OTF(Ap, p, N);
-		//printf("Ap after iter %ld\n", iter);
-		//print_vector(Ap, N);
-		//break;
 	
         //alpha = rsold / (p' * Ap);
 		double alpha = rsold / dotp(p, Ap, N);
-		//printf("alpha = %lf after iter %ld\n", alpha, iter);
 
         //x = x + alpha * p;
 		axpy(1.0, x, alpha, p, N);
 
         //r = r - alpha * Ap;
 		axpy(1.0, r, -alpha, Ap, N);
-		//printf("r after iter %ld\n", iter);
-		//print_vector(r, N);
 
         double rsnew = dotp(r,r,N);
 
@@ -209,18 +129,18 @@ void conjgrad(double ** A, double * x, double * b, long N)
         //p = (rsnew / rsold) * p + r;
 		axpy(rsnew/rsold, p, 1.0, r, N);
 
-        //rsold = rsnew;
 		rsold = rsnew;
-		//printf("x after iter %ld\n", iter);
-		//print_vector(x, N);
 	}
-	printf("converged in %ld iterations.\n", iter);
+	printf("CG converged in %ld iterations.\n", iter);
 
 	free(r);
 	free(p);
 	free(Ap);
 }
 
+// Fills an Explicit Fully Stored 2D Poisson Operator Matrix 'A'
+// A = 2D Matrix
+// N = dimension
 void fill_A(double ** A, long N)
 {
 	long n = sqrt(N);
@@ -262,6 +182,10 @@ void fill_A(double ** A, long N)
 	}
 }
 
+// Sets a boundary condiiton for the right hand side 'b' vector
+// Takes as input 2D spatial domain indices
+// i, j = indices
+// n = physical dimension
 double get_b(long i, long j, long n)
 {
 	double up = 0.0;
@@ -281,6 +205,9 @@ double get_b(long i, long j, long n)
 	return 0.0;
 }
 
+// Fills a 1-D RHS vector specifying boundary conditions
+// b = 1-D RHS vector
+// N = dimension (length of b)
 void fill_b(double * b, long N)
 {
 	long n = sqrt(N);
@@ -292,41 +219,3 @@ void fill_b(double * b, long N)
 		}
 }
 
-int main(int argc, const char** argv){
-	
-	FILE *outfile;
-		
-	// n x n square grid
-	int n = 100;
-
-	// Dimension of operator matrix and vectors is n^2
-	int N = n*n;
-	
-	// Allocate full A matrix and vectors
-	double ** A = matrix( N );
-	double *  x = (double*) calloc(N, sizeof(double));
-	double *  b = (double*) calloc(N, sizeof(double));
-
-	// Compute elements of 'A' matrix (Poisson Operator)
-	fill_A(A, N);
-
-	// Compute elements of boundary condition vector 'b'
-	fill_b(b, N);
-
-	/*
-	printf("A matrix:\n");
-	print_matrix(A, N);
-
-	printf("b vector:\n");
-	print_vector(b, N);
-	
-	printf("Running CG...\n");
-	*/
-	conjgrad(A, x, b, N);
-
-	//printf("Solution matrix:\n");
-	//print_vector(x, N);
-
-	save_vector(x,N);
-	
-}
