@@ -16,6 +16,7 @@ program = cg
 source = \
 main.c \
 serial.c \
+parallel.c \
 utils.c
 
 obj = $(source:.c=.o)

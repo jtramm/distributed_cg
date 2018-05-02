@@ -1,22 +1,47 @@
 #include "cg_header.h"
 
-int main(int argc, const char** argv)
+
+int main(int argc, char* argv[])
 {
-	double start, stop;
+	int nprocs = 1;
+	int mype = 0;
+
+	#ifdef MPI
+    MPI_Init(&argc, &argv);
+    MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
+    MPI_Comm_rank(MPI_COMM_WORLD, &mype);
+    #endif
 
 	// n x n square grid
 	int n = 75;
+	
+	printf("Solving Poisson Equation on %d x %d domain...\n", n, n);
+
+	// Run dense CG solve
+	run_dense(n);
+
+	// Run sparse CG solve
+	run_sparse(n);
+
+	// Run parallel CG solve
+	run_parallel_sparse(n, mype, nprocs);
+	
+	#ifdef MPI
+    MPI_Finalize();
+    #endif
+	
+	return 0;
+}
+
+/////////////////////////////////////////////////////////////////
+// Run "naive" CG solve, where A is fully stored in dense format
+/////////////////////////////////////////////////////////////////
+void run_dense(long n)
+{
+	printf("Running Dense CG solve...\n");
 
 	// Dimension of operator matrix and vectors is n^2
 	int N = n*n;
-
-	printf("Solving Poisson Equation on %d x %d domain...\n", n, n);
-
-	/////////////////////////////////////////////////////////////////
-	// Run "naive" CG solve, where A is fully stored in dense format
-	/////////////////////////////////////////////////////////////////
-	
-	printf("Running Dense CG solve...\n");
 	
 	// Allocate full A matrix and vectors
 	double ** A = matrix( N );
@@ -31,9 +56,9 @@ int main(int argc, const char** argv)
 	fill_b(b, N);
 
 	// Run Dense CG Solve
-	start = get_time();
+	double start = get_time();
 	cg_dense(A, x, b, N);
-	stop = get_time();
+	double stop = get_time();
 	printf("Dense Runtime = %.2lf seconds\n", stop-start);
 
 	// Save Solution Vector to File
@@ -42,24 +67,33 @@ int main(int argc, const char** argv)
 	// Free A matrix
 	matrix_free(A);
 
-	/////////////////////////////////////////////////////////////////
-	// Run optimized CG solve, where A is assembled on the fly (OTF)
-	/////////////////////////////////////////////////////////////////
-	
+	// Free vectors
+	free(x);
+	free(b);
+}
+
+/////////////////////////////////////////////////////////////////
+// Run optimized CG solve, where A is assembled on the fly (OTF)
+/////////////////////////////////////////////////////////////////
+void run_sparse(long n)
+{
 	printf("Running Sparse CG solve...\n");
+
+	// Dimension of operator matrix and vectors is n^2
+	int N = n*n;
 	
 	// reset vectors
-	memset(x, 0, N * sizeof(double));
-	memset(b, 0, N * sizeof(double));
+	double *  x = (double*) calloc(N, sizeof(double));
+	double *  b = (double*) calloc(N, sizeof(double));
 	printf("Sparse Memory  = %.2lf MB\n", (2*N)*sizeof(double)/1024.0/1024.0);
 
 	// Compute elements of boundary condition vector 'b'
 	fill_b(b, N);
 
 	// Run Sparse CG Solve
-	start = get_time();
+	double start = get_time();
 	cg_sparse_poisson(x, b, N);
-	stop = get_time();
+	double stop = get_time();
 	printf("Sparse Runtime = %.2lf seconds\n", stop-start);
 
 	// Save Solution Vector to File
@@ -68,6 +102,14 @@ int main(int argc, const char** argv)
 	// Free vectors
 	free(x);
 	free(b);
-	
-	return 0;
+}
+
+/////////////////////////////////////////////////////////////////
+// Run Domain Decomposed Parallel CG solve w/MPI
+// where A is assembled on the fly (OTF)
+/////////////////////////////////////////////////////////////////
+void run_parallel_sparse(long n, int mype, int nprocs )
+{
+	printf("Parallel Sparse Solver Not Yet Implemented...\n");
+
 }
