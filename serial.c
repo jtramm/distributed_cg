@@ -251,6 +251,22 @@ double find_b(long i, long j, long n)
 	double left = 0.5;
 	double right = 1.0;
 
+	// Check for 4 corners first
+	
+	// Upper left
+	if( j == 0 && i == 0 )
+		return (up+left)/2.0;
+	// Upper left
+	if( j == n-1 && i == 0 )
+		return (up+right)/2.0;
+	// Lower left
+	if( j == 0 && i == n-1 )
+		return (down+left)/2.0;
+	// Lower right
+	if( j == n-1 && i == n-1 )
+		return (down+right)/2.0;
+
+	// Check for regular boundaries
 	if( j == 0 )
 		return left;
 	else if( j == n-1 )
