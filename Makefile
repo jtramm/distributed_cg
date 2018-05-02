@@ -12,11 +12,12 @@ PROFILE     = no
 # Program name & source code list
 #===============================================================================
 
-program = conj
+program = cg
 
 source = \
 main.c \
-conj.c \
+cg_dense.c \
+cg_sparse.c \
 utils.c
 
 obj = $(source:.c=.o)
@@ -73,17 +74,17 @@ endif
 # Targets to Build
 #===============================================================================
 
-$(program): $(obj) conj_header.h Makefile
+$(program): $(obj) cg_header.h Makefile
 	$(CC) $(CFLAGS) $(obj) -o $@ $(LDFLAGS)
 
-%.o: %.c Makefile conj_header.h
+%.o: %.c Makefile cg_header.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -rf $(program) $(obj) *\.lst conj.dSYM
+	rm -rf $(program) $(obj) *\.lst cg.dSYM
 
 edit:
-	vim -p $(source) conj_header.h
+	vim -p $(source) cg_header.h
 
 run:
 	./$(program)

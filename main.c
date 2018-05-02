@@ -1,4 +1,4 @@
-#include "conj_header.h"
+#include "cg_header.h"
 
 int main(int argc, const char** argv){
 	

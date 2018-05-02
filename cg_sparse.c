@@ -1,4 +1,59 @@
-#include "conj_header.h"
+#include "cg_header.h"
+
+// Serial Conjugate Gradient Solver Function for Ax = b
+// A must be symmetric and positive definite
+// A = 2D operator matrix
+// x = 1D solution vector
+// b = 1D vector
+// N = dimension
+void cg_sparse(double ** A, double * x, double * b, long N)
+{
+	// r = -A*x + b
+	double * r = (double *) malloc( N*sizeof(double));
+	matvec_OTF(r, x, N);
+	axpy(-1.0, r, 1.0, b, N);
+
+    //p = r;
+	double * p = (double *) malloc( N*sizeof(double));
+	memcpy(p, r, N*sizeof(double));
+
+    //rsold = r' * r;
+	double rsold = dotp(r, r, N); 
+
+	// Ap
+	double * Ap = (double *) malloc( N*sizeof(double));
+
+	long iter = 0;
+	for( iter = 0; iter < N; iter++ )
+	{
+        //Ap = A * p;
+		matvec_OTF(Ap, p, N);
+	
+        //alpha = rsold / (p' * Ap);
+		double alpha = rsold / dotp(p, Ap, N);
+
+        //x = x + alpha * p;
+		axpy(1.0, x, alpha, p, N);
+
+        //r = r - alpha * Ap;
+		axpy(1.0, r, -alpha, Ap, N);
+
+        double rsnew = dotp(r,r,N);
+
+        if( sqrt(rsnew) < 1.0e-10 )
+            break;
+
+        //p = (rsnew / rsold) * p + r;
+		axpy(rsnew/rsold, p, 1.0, r, N);
+
+		rsold = rsnew;
+	}
+	printf("CG converged in %ld iterations.\n", iter);
+
+	free(r);
+	free(p);
+	free(Ap);
+}
 
 // General Matrix Vector Product for v = M * w
 // v, w = 1D vectors
@@ -83,60 +138,6 @@ void axpy( double alpha, double * w, double beta, double * v, long N)
 		w[i] = alpha * w[i] + beta * v[i];
 }
 
-// Serial Conjugate Gradient Solver Function for Ax = b
-// A must be symmetric and positive definite
-// A = 2D operator matrix
-// x = 1D solution vector
-// b = 1D vector
-// N = dimension
-void conjgrad(double ** A, double * x, double * b, long N)
-{
-	// r = -A*x + b
-	double * r = (double *) malloc( N*sizeof(double));
-	matvec_OTF(r, x, N);
-	axpy(-1.0, r, 1.0, b, N);
-
-    //p = r;
-	double * p = (double *) malloc( N*sizeof(double));
-	memcpy(p, r, N*sizeof(double));
-
-    //rsold = r' * r;
-	double rsold = dotp(r, r, N); 
-
-	// Ap
-	double * Ap = (double *) malloc( N*sizeof(double));
-
-	long iter = 0;
-	for( iter = 0; iter < N; iter++ )
-	{
-        //Ap = A * p;
-		matvec_OTF(Ap, p, N);
-	
-        //alpha = rsold / (p' * Ap);
-		double alpha = rsold / dotp(p, Ap, N);
-
-        //x = x + alpha * p;
-		axpy(1.0, x, alpha, p, N);
-
-        //r = r - alpha * Ap;
-		axpy(1.0, r, -alpha, Ap, N);
-
-        double rsnew = dotp(r,r,N);
-
-        if( sqrt(rsnew) < 1.0e-10 )
-            break;
-
-        //p = (rsnew / rsold) * p + r;
-		axpy(rsnew/rsold, p, 1.0, r, N);
-
-		rsold = rsnew;
-	}
-	printf("CG converged in %ld iterations.\n", iter);
-
-	free(r);
-	free(p);
-	free(Ap);
-}
 
 // Fills an Explicit Fully Stored 2D Poisson Operator Matrix 'A'
 // A = 2D Matrix

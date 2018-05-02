@@ -1,4 +1,4 @@
-#include "conj_header.h"
+#include "cg_header.h"
 
 void print_matrix(double ** A, long N )
 {
