@@ -3,6 +3,7 @@
 #include <string.h>
 #include <math.h>
 #include <time.h>
+#include <assert.h>
 #ifdef MPI
 #include <mpi.h>
 #endif

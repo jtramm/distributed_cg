@@ -39,7 +39,7 @@ ifeq ($(COMPILER),intel)
 endif
 
 # Standard Flags
-CFLAGS := -std=gnu99
+CFLAGS := -std=gnu99 -Wall
 
 # MPI Compiler
 ifeq ($(MPI),yes)

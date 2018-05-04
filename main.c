@@ -1,6 +1,5 @@
 #include "cg_header.h"
 
-
 int main(int argc, char* argv[])
 {
 	int nprocs = 1;
@@ -12,8 +11,20 @@ int main(int argc, char* argv[])
 	MPI_Comm_rank(MPI_COMM_WORLD, &mype);
 	#endif
 
-	// n x n square grid
-	int n = 75;
+	// n is the physical domain size;
+	int n;
+
+	// Read n from first command line argument
+	if( argc != 2 )
+	{
+		printf("Please provide physical domain dimension as first argument to program, e.g.:\n\t$> ./cg 75\n");
+		return 1;
+	}
+	else
+		n = atoi(argv[1]);
+	
+	// Make sure n is reasonable
+	assert(n > 0 && isfinite(n));
 
 	printf("Solving Poisson Equation on %d x %d domain...\n", n, n);
 
