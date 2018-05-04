@@ -47,7 +47,7 @@ void run_dense(long n)
 	double ** A = matrix( N );
 	double *  x = (double*) calloc(N, sizeof(double));
 	double *  b = (double*) calloc(N, sizeof(double));
-	printf("Dense Memory  = %.2lf MB\n", (N*N+2*N)*sizeof(double)/1024.0/1024.0);
+	printf("Dense Memory  = %.2lf MB\n", (N*N+5*N)*sizeof(double)/1024.0/1024.0);
 
 	// Compute elements of 'A' matrix (Poisson Operator)
 	fill_A(A, N);
@@ -85,7 +85,7 @@ void run_sparse(long n)
 	// reset vectors
 	double *  x = (double*) calloc(N, sizeof(double));
 	double *  b = (double*) calloc(N, sizeof(double));
-	printf("Sparse Memory  = %.2lf MB\n", (2*N)*sizeof(double)/1024.0/1024.0);
+	printf("Sparse Memory  = %.2lf MB\n", (5*N)*sizeof(double)/1024.0/1024.0);
 
 	// Compute elements of boundary condition vector 'b'
 	fill_b(b, N);
