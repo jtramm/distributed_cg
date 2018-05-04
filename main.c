@@ -7,14 +7,14 @@ int main(int argc, char* argv[])
 	int mype = 0;
 
 	#ifdef MPI
-    MPI_Init(&argc, &argv);
-    MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
-    MPI_Comm_rank(MPI_COMM_WORLD, &mype);
-    #endif
+	MPI_Init(&argc, &argv);
+	MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
+	MPI_Comm_rank(MPI_COMM_WORLD, &mype);
+	#endif
 
 	// n x n square grid
 	int n = 75;
-	
+
 	printf("Solving Poisson Equation on %d x %d domain...\n", n, n);
 
 	// Run dense CG solve
@@ -25,11 +25,11 @@ int main(int argc, char* argv[])
 
 	// Run parallel CG solve
 	run_parallel_sparse(n, mype, nprocs);
-	
+
 	#ifdef MPI
-    MPI_Finalize();
-    #endif
-	
+	MPI_Finalize();
+	#endif
+
 	return 0;
 }
 
@@ -42,7 +42,7 @@ void run_dense(long n)
 
 	// Dimension of operator matrix and vectors is n^2
 	int N = n*n;
-	
+
 	// Allocate full A matrix and vectors
 	double ** A = matrix( N );
 	double *  x = (double*) calloc(N, sizeof(double));
@@ -81,7 +81,7 @@ void run_sparse(long n)
 
 	// Dimension of operator matrix and vectors is n^2
 	int N = n*n;
-	
+
 	// reset vectors
 	double *  x = (double*) calloc(N, sizeof(double));
 	double *  b = (double*) calloc(N, sizeof(double));

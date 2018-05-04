@@ -67,16 +67,16 @@ void matrix_free( double ** M)
 
 double get_time(void)
 {
-    #ifdef MPI
-    return MPI_Wtime();
-    #endif
+	#ifdef MPI
+	return MPI_Wtime();
+	#endif
 
-    #ifdef OPENMP
-    return omp_get_wtime();
-    #endif
+	#ifdef OPENMP
+	return omp_get_wtime();
+	#endif
 
-    time_t time;
-    time = clock();
+	time_t time;
+	time = clock();
 
-    return (double) time / (double) CLOCKS_PER_SEC;
+	return (double) time / (double) CLOCKS_PER_SEC;
 }

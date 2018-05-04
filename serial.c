@@ -13,11 +13,11 @@ void cg_dense(double ** A, double * x, double * b, long N)
 	matvec(r, A, x, N);
 	axpy(-1.0, r, 1.0, b, N);
 
-    //p = r;
+	//p = r;
 	double * p = (double *) malloc( N*sizeof(double));
 	memcpy(p, r, N*sizeof(double));
 
-    //rsold = r' * r;
+	//rsold = r' * r;
 	double rsold = dotp(r, r, N); 
 
 	// Ap
@@ -26,24 +26,24 @@ void cg_dense(double ** A, double * x, double * b, long N)
 	long iter = 0;
 	for( iter = 0; iter < N; iter++ )
 	{
-        //Ap = A * p;
+		//Ap = A * p;
 		matvec(Ap, A, p, N);
-	
-        //alpha = rsold / (p' * Ap);
+
+		//alpha = rsold / (p' * Ap);
 		double alpha = rsold / dotp(p, Ap, N);
 
-        //x = x + alpha * p;
+		//x = x + alpha * p;
 		axpy(1.0, x, alpha, p, N);
 
-        //r = r - alpha * Ap;
+		//r = r - alpha * Ap;
 		axpy(1.0, r, -alpha, Ap, N);
 
-        double rsnew = dotp(r,r,N);
+		double rsnew = dotp(r,r,N);
 
-        if( sqrt(rsnew) < 1.0e-10 )
-            break;
+		if( sqrt(rsnew) < 1.0e-10 )
+			break;
 
-        //p = (rsnew / rsold) * p + r;
+		//p = (rsnew / rsold) * p + r;
 		axpy(rsnew/rsold, p, 1.0, r, N);
 
 		rsold = rsnew;
@@ -68,11 +68,11 @@ void cg_sparse_poisson(double * x, double * b, long N)
 	matvec_OTF(r, x, N);
 	axpy(-1.0, r, 1.0, b, N);
 
-    //p = r;
+	//p = r;
 	double * p = (double *) malloc( N*sizeof(double));
 	memcpy(p, r, N*sizeof(double));
 
-    //rsold = r' * r;
+	//rsold = r' * r;
 	double rsold = dotp(r, r, N); 
 
 	// Ap
@@ -81,24 +81,24 @@ void cg_sparse_poisson(double * x, double * b, long N)
 	long iter = 0;
 	for( iter = 0; iter < N; iter++ )
 	{
-        //Ap = A * p;
+		//Ap = A * p;
 		matvec_OTF(Ap, p, N);
-	
-        //alpha = rsold / (p' * Ap);
+
+		//alpha = rsold / (p' * Ap);
 		double alpha = rsold / dotp(p, Ap, N);
 
-        //x = x + alpha * p;
+		//x = x + alpha * p;
 		axpy(1.0, x, alpha, p, N);
 
-        //r = r - alpha * Ap;
+		//r = r - alpha * Ap;
 		axpy(1.0, r, -alpha, Ap, N);
 
-        double rsnew = dotp(r,r,N);
+		double rsnew = dotp(r,r,N);
 
-        if( sqrt(rsnew) < 1.0e-10 )
-            break;
+		if( sqrt(rsnew) < 1.0e-10 )
+			break;
 
-        //p = (rsnew / rsold) * p + r;
+		//p = (rsnew / rsold) * p + r;
 		axpy(rsnew/rsold, p, 1.0, r, N);
 
 		rsold = rsnew;
@@ -118,7 +118,7 @@ void matvec( double * v, double ** M, double * w, long N )
 {
 	// Set solution vector to 0
 	memset( v, 0, N*sizeof(double));
-	
+
 	for (long i = 0; i < N; i++)
 		for (long j = 0; j < N; j++)
 			v[i] += (M[i][j] * w[j]);
@@ -136,7 +136,7 @@ void matvec_OTF( double * v, double * w, long N )
 
 	// Set solution vector to 0
 	memset( v, 0, N*sizeof(double));
-	
+
 	for( long i = 0; i < N; i++ )
 	{
 		// Physical 2D x-coordinate
@@ -252,7 +252,7 @@ double find_b(long i, long j, long n)
 	double right = 1.0;
 
 	// Check for 4 corners first
-	
+
 	// Upper left
 	if( j == 0 && i == 0 )
 		return (up+left)/2.0;
@@ -275,7 +275,7 @@ double find_b(long i, long j, long n)
 		return up;
 	else if( i == n-1 )
 		return down;
-	
+
 	return 0.0;
 }
 
