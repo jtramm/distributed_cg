@@ -44,6 +44,7 @@ void save_vector(double * x, long N, char * fname )
 		if( i != n - 1 )
 			fprintf(fp, "\n");
 	}
+	fclose(fp);
 }
 
 /* Allocates 2-D Contiguous Matrix */

@@ -102,6 +102,7 @@ void cg_sparse_poisson(double * x, double * b, long N)
 		axpy(rsnew/rsold, p, 1.0, r, N);
 
 		rsold = rsnew;
+	
 	}
 	printf("CG converged in %ld iterations.\n", iter);
 
@@ -238,45 +239,23 @@ void fill_A(double ** A, long N)
 	}
 }
 
-// Sets a boundary condiiton for the right hand side 'b' vector
+// Sets a circular source term for the right hand side 'b' vector
 // Takes as input 2D spatial domain indices
 // i, j = indices
 // n = physical dimension
 double find_b(long i, long j, long n)
 {
-	// These are abritrary boundary conditions
-	// (e.g., temperatures)
-	double up = 0.0;
-	double down = 2.0;
-	double left = 0.5;
-	double right = 1.0;
+	double delta = 1.0 / (double) n;
 
-	// Check for 4 corners first
+	double x = -.5 + delta + delta * j;
+	double y = -.5 + delta + delta * i;
 
-	// Upper left
-	if( j == 0 && i == 0 )
-		return (up+left)/2.0;
-	// Upper left
-	if( j == n-1 && i == 0 )
-		return (up+right)/2.0;
-	// Lower left
-	if( j == 0 && i == n-1 )
-		return (down+left)/2.0;
-	// Lower right
-	if( j == n-1 && i == n-1 )
-		return (down+right)/2.0;
-
-	// Check for regular boundaries
-	if( j == 0 )
-		return left;
-	else if( j == n-1 )
-		return right;
-	else if( i == 0 )
-		return up;
-	else if( i == n-1 )
-		return down;
-
-	return 0.0;
+	// Check if within a circle
+	double radius = 0.1;
+	if( x*x + y*y < radius*radius )
+		return delta * delta / 1.075271758e-02;
+	else
+		return 0.0;
 }
 
 // Fills a 1-D RHS vector specifying boundary conditions
