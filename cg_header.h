@@ -38,3 +38,4 @@ void save_vector(double * x, long N, char * fname );
 double ** matrix( long N );
 void matrix_free( double ** M);
 double get_time(void);
+void cli_error(void);

@@ -81,3 +81,12 @@ double get_time(void)
 
 	return (double) time / (double) CLOCKS_PER_SEC;
 }
+
+void cli_error(void)
+{
+	printf("Please provide physical domain dimension as first argument to program\nand \'serial\' or \'parallel\' as the second argument, e.g.:\n\t$> ./cg 75 serial\n");
+	#ifdef MPI
+	MPI_Finalize();
+	#endif
+	exit(1);
+}

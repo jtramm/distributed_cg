@@ -12,14 +12,11 @@ int main(int argc, char* argv[])
 	#endif
 
 	// n is the physical domain size;
-	int n;
+	int n = 1;
 
 	// Read n from first command line argument
-	if( argc != 2 )
-	{
-		printf("Please provide physical domain dimension as first argument to program, e.g.:\n\t$> ./cg 75\n");
-		return 1;
-	}
+	if( argc != 3 )
+		cli_error();
 	else
 		n = atoi(argv[1]);
 	
@@ -28,14 +25,22 @@ int main(int argc, char* argv[])
 
 	printf("Solving Poisson Equation on %d x %d domain...\n", n, n);
 
-	// Run dense CG solve
-	run_dense(n);
+	// Use 2nd CLI argument to determine serial or parallel solve
+	if( !strcmp(argv[2], "serial") )
+	{
+		// Run dense CG solve
+		run_dense(n);
 
-	// Run sparse CG solve
-	run_sparse(n);
-
-	// Run parallel CG solve
-	run_parallel_sparse(n, mype, nprocs);
+		// Run sparse CG solve
+		run_sparse(n);
+	}
+	else if( !strcmp(argv[2], "parallel") )
+	{
+		// Run parallel CG solve
+		run_parallel_sparse(n, mype, nprocs);
+	}
+	else
+		cli_error();
 
 	#ifdef MPI
 	MPI_Finalize();

@@ -20,23 +20,23 @@ void cg_dense(double ** A, double * x, double * b, long N)
 	//rsold = r' * r;
 	double rsold = dotp(r, r, N); 
 
-	// Ap
-	double * Ap = (double *) malloc( N*sizeof(double));
+	// z
+	double * z = (double *) malloc( N*sizeof(double));
 
 	long iter = 0;
 	for( iter = 0; iter < N; iter++ )
 	{
-		//Ap = A * p;
-		matvec(Ap, A, p, N);
+		//z = A * p;
+		matvec(z, A, p, N);
 
-		//alpha = rsold / (p' * Ap);
-		double alpha = rsold / dotp(p, Ap, N);
+		//alpha = rsold / (p' * z);
+		double alpha = rsold / dotp(p, z, N);
 
 		//x = x + alpha * p;
 		axpy(1.0, x, alpha, p, N);
 
-		//r = r - alpha * Ap;
-		axpy(1.0, r, -alpha, Ap, N);
+		//r = r - alpha * z;
+		axpy(1.0, r, -alpha, z, N);
 
 		double rsnew = dotp(r,r,N);
 
@@ -52,7 +52,7 @@ void cg_dense(double ** A, double * x, double * b, long N)
 
 	free(r);
 	free(p);
-	free(Ap);
+	free(z);
 }
 
 // Serial Conjugate Gradient Solver Function for Ax = b
@@ -75,23 +75,23 @@ void cg_sparse_poisson(double * x, double * b, long N)
 	//rsold = r' * r;
 	double rsold = dotp(r, r, N); 
 
-	// Ap
-	double * Ap = (double *) malloc( N*sizeof(double));
+	// z
+	double * z = (double *) malloc( N*sizeof(double));
 
 	long iter = 0;
 	for( iter = 0; iter < N; iter++ )
 	{
-		//Ap = A * p;
-		matvec_OTF(Ap, p, N);
+		//z = A * p;
+		matvec_OTF(z, p, N);
 
-		//alpha = rsold / (p' * Ap);
-		double alpha = rsold / dotp(p, Ap, N);
+		//alpha = rsold / (p' * z);
+		double alpha = rsold / dotp(p, z, N);
 
 		//x = x + alpha * p;
 		axpy(1.0, x, alpha, p, N);
 
-		//r = r - alpha * Ap;
-		axpy(1.0, r, -alpha, Ap, N);
+		//r = r - alpha * z;
+		axpy(1.0, r, -alpha, z, N);
 
 		double rsnew = dotp(r,r,N);
 
@@ -108,7 +108,7 @@ void cg_sparse_poisson(double * x, double * b, long N)
 
 	free(r);
 	free(p);
-	free(Ap);
+	free(z);
 }
 
 // General Matrix Vector Product for v = M * w
